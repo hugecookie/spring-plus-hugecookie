@@ -5,15 +5,21 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.example.expert.domain.common.dto.AuthUser;
 import org.example.expert.domain.common.exception.ServerException;
 import org.example.expert.domain.user.enums.UserRole;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.security.Key;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.Date;
 
 @Slf4j(topic = "JwtUtil")
@@ -34,7 +40,7 @@ public class JwtUtil {
         key = Keys.hmacShaKeyFor(bytes);
     }
 
-    public String createToken(Long userId, String email, UserRole userRole) {
+    public String createToken(Long userId, String email, String nickname, UserRole userRole) {
         Date date = new Date();
 
         return BEARER_PREFIX +
@@ -42,6 +48,7 @@ public class JwtUtil {
                         .setSubject(String.valueOf(userId))
                         .claim("email", email)
                         .claim("userRole", userRole)
+                        .claim("nickname", nickname)
                         .setExpiration(new Date(date.getTime() + TOKEN_TIME))
                         .setIssuedAt(date) // 발급일
                         .signWith(key, signatureAlgorithm) // 암호화 알고리즘
@@ -62,4 +69,37 @@ public class JwtUtil {
                 .parseClaimsJws(token)
                 .getBody();
     }
+
+    public String resolveToken(HttpServletRequest request) {
+        String bearer = request.getHeader("Authorization");
+        return StringUtils.hasText(bearer) && bearer.startsWith(BEARER_PREFIX) ? substringToken(bearer) : null;
+    }
+
+    public boolean validateToken(String token) {
+        try {
+            extractClaims(token); // 만료 시 여기서 예외 발생함
+            return true;
+        } catch (Exception e) {
+            log.warn("JWT 유효성 검사 실패: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    public Authentication getAuthentication(String token) {
+        Claims claims = extractClaims(token);
+
+        Long userId = Long.parseLong(claims.getSubject());
+        String email = claims.get("email", String.class);
+        String nickname = claims.get("nickname", String.class);
+        UserRole userRole = UserRole.valueOf(claims.get("userRole", String.class)); // ← 여기!
+
+        AuthUser authUser = new AuthUser(userId, email, userRole, nickname);
+
+        return new UsernamePasswordAuthenticationToken(
+                authUser,
+                null,
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + userRole.name()))
+        );
+    }
+
 }
