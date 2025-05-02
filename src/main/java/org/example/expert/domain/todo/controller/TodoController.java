@@ -12,6 +12,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.example.expert.domain.todo.dto.request.TodoSearchCond;
+import org.example.expert.domain.todo.dto.response.TodoSearchResponse;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 
@@ -44,5 +47,13 @@ public class TodoController {
     @GetMapping("/todos/{todoId}")
     public ResponseEntity<TodoResponse> getTodo(@PathVariable long todoId) {
         return ResponseEntity.ok(todoService.getTodo(todoId));
+    }
+
+    @GetMapping("/todos/search")
+    public Page<TodoSearchResponse> searchTodos(
+            TodoSearchCond cond,
+            Pageable pageable
+    ) {
+        return todoService.searchTodos(cond, pageable);
     }
 }
