@@ -53,6 +53,10 @@ dependencies {
     annotationProcessor 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 
     implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // AWS S3 SDK (v2)
+    implementation platform('software.amazon.awssdk:bom:2.25.17')
+    implementation 'software.amazon.awssdk:s3'
 }
 
 def querydslDir = "$buildDir/generated/querydsl"
