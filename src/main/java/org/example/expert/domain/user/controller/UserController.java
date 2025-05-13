@@ -26,4 +26,9 @@ public class UserController {
             @RequestBody UserChangePasswordRequest userChangePasswordRequest) {
         userService.changePassword(authUser.getId(), userChangePasswordRequest);
     }
+
+    @GetMapping("/api/users/search")
+    public ResponseEntity<UserResponse> searchByNickname(@RequestParam String nickname) {
+        return ResponseEntity.ok(userService.findByNickname(nickname));
+    }
 }
