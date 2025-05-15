@@ -54,4 +54,10 @@ public class UserService {
                 .orElseThrow(() -> new InvalidRequestException("User not found"));
         return new UserResponse(user.getId(), user.getEmail(), user.getNickname());
     }
+
+    public UserResponse findByNicknameNative(String nickname) {
+        User user = userRepository.findByNicknameNative(nickname)
+                .orElseThrow(() -> new InvalidRequestException("User not found"));
+        return new UserResponse(user.getId(), user.getEmail(), user.getNickname());
+    }
 }
