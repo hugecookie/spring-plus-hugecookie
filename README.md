@@ -24,3 +24,21 @@
 
 > 브라우저 응답 예시  
 ![Health Check 응답](./imgs/HealthCheck.png)
+
+
+## 🔍 닉네임 검색 성능 비교
+
+> 일반 JPA 조회
+![img.png](imgs/JPA.png)
+
+> 인덱싱
+![img.png](imgs/indexing.png)
+
+> native query
+![img.png](imgs/NativeQuery.png)
+
+| 방법             | 응답 시간 (ms) | 설명                              |
+|------------------|------------|-----------------------------------|
+| 기본 JPA 조회     | 1060 ms    | 인덱스 없이 100만 건 중 풀스캔     |
+| JPA + 인덱스      | 16 ms      | `@Index` 설정 후 자동 인덱스 적용 |
+| Native Query + 인덱스 | 29 ms      | 직접 SQL로 빠른 탐색 수행          |
