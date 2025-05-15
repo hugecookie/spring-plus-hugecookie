@@ -31,4 +31,9 @@ public class UserController {
     public ResponseEntity<UserResponse> searchByNickname(@RequestParam String nickname) {
         return ResponseEntity.ok(userService.findByNickname(nickname));
     }
+
+    @GetMapping("/api/users/search/native")
+    public ResponseEntity<UserResponse> searchByNicknameNative(@RequestParam String nickname) {
+        return ResponseEntity.ok(userService.findByNicknameNative(nickname));
+    }
 }
